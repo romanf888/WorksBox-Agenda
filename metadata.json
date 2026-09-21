@@ -1,0 +1,6 @@
+{
+  "name": "WorksBox Agenda",
+  "description": "WorksBox Agenda - Application scolaire pour organiser les devoirs et dates de rendu avec rappels, notifications et synchronisation Firebase Google.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
