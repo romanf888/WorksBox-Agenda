@@ -25,7 +25,7 @@ import { Assignment } from './types';
 type ActiveTab = 'calendar' | 'list' | 'subjects';
 
 const AgendaAppContent: React.FC = () => {
-  const { assignments, user, loadingAuth } = useAgenda();
+  const { assignments, user, loadingAuth, isGuestMode } = useAgenda();
   const [activeTab, setActiveTab] = useState<ActiveTab>('calendar');
   
   // Modals state
@@ -49,8 +49,8 @@ const AgendaAppContent: React.FC = () => {
     );
   }
 
-  // Mandatory Google Authentication Gate
-  if (!user) {
+  // Google Authentication Gate (unless guest/offline mode is enabled)
+  if (!user && !isGuestMode) {
     return <GoogleAuthGate />;
   }
 

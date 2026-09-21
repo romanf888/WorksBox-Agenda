@@ -15,7 +15,7 @@ import { useAgenda } from '../context/AgendaContext';
 import { useTheme } from '../context/ThemeContext';
 
 export const GoogleAuthGate: React.FC = () => {
-  const { signInWithGoogle, isSyncing } = useAgenda();
+  const { signInWithGoogle, isSyncing, enableGuestMode } = useAgenda();
   const { theme, toggleTheme } = useTheme();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
@@ -27,11 +27,18 @@ export const GoogleAuthGate: React.FC = () => {
       await signInWithGoogle();
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(
-        err?.message?.includes('popup-blocked')
-          ? 'La fenêtre de connexion a été bloquée par votre navigateur. Veuillez autoriser les fenêtres pop-up.'
-          : 'La connexion avec Google a échoué. Veuillez réessayer.'
-      );
+      const msg = err?.message || '';
+      const code = err?.code || '';
+
+      if (code === 'auth/unauthorized-domain' || msg.includes('unauthorized-domain')) {
+        setErrorMsg(
+          `Le domaine "${window.location.hostname}" n'est pas encore autorisé dans Firebase Authentication. Ajoutez "${window.location.hostname}" dans la console Firebase (Authentication > Paramètres > Domaines autorisés). Vous pouvez en attendant cliquer sur "Continuer en mode local".`
+        );
+      } else if (msg.includes('popup-blocked')) {
+        setErrorMsg('La fenêtre de connexion a été bloquée par votre navigateur. Veuillez autoriser les fenêtres pop-up.');
+      } else {
+        setErrorMsg('La connexion avec Google a rencontré un problème. Vous pouvez réessayer ou continuer en mode local.');
+      }
     } finally {
       setIsSigningIn(false);
     }
@@ -142,6 +149,16 @@ export const GoogleAuthGate: React.FC = () => {
                   </span>
                 </>
               )}
+            </button>
+
+            {/* Offline / Local Mode Button */}
+            <button
+              id="guest-mode-btn"
+              type="button"
+              onClick={enableGuestMode}
+              className="w-full py-2.5 px-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Continuer en mode local (sans compte)</span>
             </button>
 
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 space-y-3 text-xs text-slate-500 dark:text-slate-400">

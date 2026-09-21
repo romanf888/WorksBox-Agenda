@@ -160,6 +160,8 @@ interface AgendaContextType {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   syncStatusMessage: string;
+  isGuestMode: boolean;
+  enableGuestMode: () => void;
 }
 
 const LOCAL_STORAGE_KEY = 'agenda_local_assignments_v1';
@@ -170,6 +172,13 @@ const AgendaContext = createContext<AgendaContextType | undefined>(undefined);
 export const AgendaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loadingAuth, setLoadingAuth] = useState<boolean>(true);
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('agenda_guest_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>(DEFAULT_SUBJECTS);
@@ -300,8 +309,22 @@ export const AgendaProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       return () => unsubscribeSnapshot();
     } else {
-      // User is not logged in: assignments is empty (no predefined tasks)
-      setAssignments([]);
+      // User is not logged in: load from local storage
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          const parsed: Assignment[] = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setAssignments(parsed);
+          } else {
+            setAssignments([]);
+          }
+        } else {
+          setAssignments([]);
+        }
+      } catch {
+        setAssignments([]);
+      }
     }
   }, [user, loadingAuth]);
 
@@ -618,6 +641,15 @@ export const AgendaProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
+  // Enable guest/offline mode
+  const enableGuestMode = () => {
+    setIsGuestMode(true);
+    setSyncStatusMessage('Mode local hors-ligne (connectez Google à tout moment)');
+    try {
+      localStorage.setItem('agenda_guest_mode', 'true');
+    } catch {}
+  };
+
   // Sign Out
   const signOut = async () => {
     try {
@@ -637,6 +669,8 @@ export const AgendaProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       value={{
         user,
         loadingAuth,
+        isGuestMode,
+        enableGuestMode,
         isSyncing,
         assignments,
         subjects,
