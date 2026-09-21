@@ -64,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Right actions: Theme Toggle + Sound + Notif + User Menu + Add Button */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
+          <nav aria-label="Actions rapides et profil" className="flex items-center gap-2 sm:gap-2.5">
             
             {/* Dark Mode Toggle Button */}
             <button
@@ -148,9 +148,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Dropdown Menu */}
                 {showUserMenu && (
-                  <div 
+                  <menu 
                     id="user-menu-dropdown"
-                    className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 p-4 z-50 animate-in fade-in zoom-in-95"
+                    className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 p-4 z-50 animate-in fade-in zoom-in-95 m-0 list-none"
                   >
                     <div className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-700">
                       {user.photoURL ? (
@@ -202,7 +202,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         Se déconnecter
                       </button>
                     </div>
-                  </div>
+                  </menu>
                 )}
               </div>
             ) : (
@@ -247,7 +247,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Nouveau devoir</span>
             </button>
 
-          </div>
+          </nav>
 
         </div>
       </div>

@@ -101,13 +101,13 @@ export const ListView: React.FC<ListViewProps> = ({ onAddNew, onEditAssignment }
   return (
     <div id="list-view-container" className="space-y-6">
       {/* Search & Filters Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs space-y-3 transition-colors">
+      <search role="search" aria-label="Rechercher et filtrer les devoirs" className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs space-y-3 transition-colors block">
         {/* Search input */}
         <div className="relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             id="search-assignments-input"
-            type="text"
+            type="search"
             placeholder="Rechercher un devoir, une matière, une consigne..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -178,11 +178,11 @@ export const ListView: React.FC<ListViewProps> = ({ onAddNew, onEditAssignment }
             </button>
           )}
         </div>
-      </div>
+      </search>
 
       {/* Empty State */}
       {filteredAssignments.length === 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-10 text-center shadow-xs transition-colors">
+        <aside aria-label="État vide" className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-10 text-center shadow-xs transition-colors">
           <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3">
             <Inbox className="w-6 h-6" />
           </div>
@@ -199,7 +199,7 @@ export const ListView: React.FC<ListViewProps> = ({ onAddNew, onEditAssignment }
           >
             + Ajouter un devoir
           </button>
-        </div>
+        </aside>
       )}
 
       {/* Sections by timeline */}
@@ -207,110 +207,125 @@ export const ListView: React.FC<ListViewProps> = ({ onAddNew, onEditAssignment }
       {/* 1. OVERDUE (En retard) */}
       {groups.overdue.length > 0 && (
         <section id="section-overdue" className="space-y-3">
-          <div className="flex items-center gap-2">
+          <header className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
             <h3 className="text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4" />
               Devoirs en retard ({groups.overdue.length})
             </h3>
-          </div>
-          <div className="space-y-2.5">
+          </header>
+          <ul className="space-y-2.5 list-none p-0 m-0">
             {groups.overdue.map((a) => (
-              <AssignmentCard key={a.id} assignment={a} onEdit={onEditAssignment} />
+              <li key={a.id}>
+                <AssignmentCard assignment={a} onEdit={onEditAssignment} />
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
 
       {/* 2. TODAY (Aujourd'hui) */}
       {groups.today.length > 0 && (
         <section id="section-today" className="space-y-3">
-          <div className="flex items-center justify-between">
+          <header className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-amber-500" />
               À rendre aujourd'hui ({groups.today.length})
             </h3>
-          </div>
-          <div className="space-y-2.5">
+          </header>
+          <ul className="space-y-2.5 list-none p-0 m-0">
             {groups.today.map((a) => (
-              <AssignmentCard key={a.id} assignment={a} onEdit={onEditAssignment} />
+              <li key={a.id}>
+                <AssignmentCard assignment={a} onEdit={onEditAssignment} />
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
 
       {/* 3. TOMORROW (Demain) */}
       {groups.tomorrow.length > 0 && (
         <section id="section-tomorrow" className="space-y-3">
-          <div className="flex items-center justify-between">
+          <header className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-blue-500" />
               À rendre demain ({groups.tomorrow.length})
             </h3>
-          </div>
-          <div className="space-y-2.5">
+          </header>
+          <ul className="space-y-2.5 list-none p-0 m-0">
             {groups.tomorrow.map((a) => (
-              <AssignmentCard key={a.id} assignment={a} onEdit={onEditAssignment} />
+              <li key={a.id}>
+                <AssignmentCard assignment={a} onEdit={onEditAssignment} />
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
 
       {/* 4. THIS WEEK (Cette semaine) */}
       {groups.thisWeek.length > 0 && (
         <section id="section-thisweek" className="space-y-3">
-          <div className="flex items-center justify-between">
+          <header className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-indigo-500" />
               Cette semaine ({groups.thisWeek.length})
             </h3>
-          </div>
-          <div className="space-y-2.5">
+          </header>
+          <ul className="space-y-2.5 list-none p-0 m-0">
             {groups.thisWeek.map((a) => (
-              <AssignmentCard key={a.id} assignment={a} onEdit={onEditAssignment} />
+              <li key={a.id}>
+                <AssignmentCard assignment={a} onEdit={onEditAssignment} />
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
 
       {/* 5. LATER (Plus tard) */}
       {groups.later.length > 0 && (
         <section id="section-later" className="space-y-3">
-          <div className="flex items-center justify-between">
+          <header className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-slate-400" />
               Plus tard ({groups.later.length})
             </h3>
-          </div>
-          <div className="space-y-2.5">
+          </header>
+          <ul className="space-y-2.5 list-none p-0 m-0">
             {groups.later.map((a) => (
-              <AssignmentCard key={a.id} assignment={a} onEdit={onEditAssignment} />
+              <li key={a.id}>
+                <AssignmentCard assignment={a} onEdit={onEditAssignment} />
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
 
       {/* 6. COMPLETED (Terminés / Rendus) */}
       {groups.completed.length > 0 && (
         <section id="section-completed" className="space-y-3 pt-2">
-          <button
-            type="button"
-            onClick={() => setShowCompleted(!showCompleted)}
-            className="flex items-center justify-between w-full text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider hover:text-slate-800 dark:hover:text-slate-200 transition cursor-pointer"
-          >
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              Devoirs terminés & rendus ({groups.completed.length})
-            </span>
-            {showCompleted ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
+          <header>
+            <button
+              type="button"
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="flex items-center justify-between w-full text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider hover:text-slate-800 dark:hover:text-slate-200 transition cursor-pointer"
+              aria-expanded={showCompleted}
+            >
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                Devoirs terminés & rendus ({groups.completed.length})
+              </span>
+              {showCompleted ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </header>
 
           {showCompleted && (
-            <div className="space-y-2.5">
+            <ul className="space-y-2.5 list-none p-0 m-0">
               {groups.completed.map((a) => (
-                <AssignmentCard key={a.id} assignment={a} onEdit={onEditAssignment} />
+                <li key={a.id}>
+                  <AssignmentCard assignment={a} onEdit={onEditAssignment} />
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </section>
       )}

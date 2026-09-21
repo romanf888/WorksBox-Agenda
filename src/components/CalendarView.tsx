@@ -101,10 +101,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const now = new Date();
 
   return (
-    <div id="agenda-calendar-container" className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
+    <section id="agenda-calendar-container" aria-label="Calendrier et emploi du temps scolaire" className="wb-card rounded-2xl sm:rounded-3xl shadow-xs overflow-hidden">
       
-      {/* Calendar Top Controls */}
-      <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70 dark:bg-slate-850/50">
+      {/* Calendar Top Controls Header */}
+      <header className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70 dark:bg-slate-850/50">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <button
@@ -113,6 +113,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               onClick={prevPeriod}
               className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition cursor-pointer"
               title="Semaine / Mois précédent"
+              aria-label="Période précédente"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -122,6 +123,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               onClick={nextPeriod}
               className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition cursor-pointer"
               title="Semaine / Mois suivant"
+              aria-label="Période suivante"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -164,7 +166,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </button>
           )}
 
-          <div className="flex items-center gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl" role="group" aria-label="Mode de vue calendrier">
             <button
               id="mode-schedule-btn"
               type="button"
@@ -193,7 +195,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* SCHEDULE VIEW (EMPLOI DU TEMPS AVEC LES HEURES AFFICHÉES) */}
       {calendarMode === 'schedule' && (
@@ -490,6 +492,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 };

@@ -23,8 +23,7 @@ import {
 } from 'lucide-react';
 import { Assignment, ASSIGNMENT_TYPE_LABELS, PRIORITY_LABELS, AttachedFile } from '../types';
 import { useAgenda } from '../context/AgendaContext';
-import { formatDateFrench, getDeadlineCountdown } from '../utils/dateUtils';
-import { formatFileSize } from '../services/fileStorage';
+import { formatDateFrench, getDeadlineCountdown, formatFileSize } from '../utils/dateUtils';
 
 interface AssignmentCardProps {
   assignment: Assignment;
@@ -93,7 +92,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment, onEd
   };
 
   return (
-    <div 
+    <article 
       id={`assignment-card-${assignment.id}`}
       className={`relative rounded-2xl border transition-all duration-200 bg-white dark:bg-slate-900 shadow-xs hover:shadow-md ${
         isCompleted 
@@ -125,8 +124,8 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment, onEd
 
           {/* Miniature / Aperçu visuel sur la gauche si présent */}
           {hasThumbnail && (
-            <div 
-              className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-800 cursor-pointer shadow-xs hover:opacity-90 transition group relative"
+            <figure 
+              className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-800 cursor-pointer shadow-xs hover:opacity-90 transition group relative m-0"
               onClick={() => assignment.thumbnailUrl && setPreviewImage(assignment.thumbnailUrl)}
               title="Cliquer pour agrandir la miniature"
             >
@@ -135,82 +134,88 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment, onEd
                 alt={`Miniature ${assignment.title}`}
                 className="w-full h-full object-cover" 
               />
+              <figcaption className="sr-only">Miniature du devoir {assignment.title}</figcaption>
               <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                 <Eye className="w-4 h-4 drop-shadow-md" />
               </div>
-            </div>
+            </figure>
           )}
 
           {/* Main info */}
           <div className="flex-1 min-w-0">
-            {/* Badges row */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5">
-              {/* Subject badge */}
-              <span 
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${subject.bgClass}`}
+            {/* Badges header row */}
+            <header>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5">
+                {/* Subject badge */}
+                <span 
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${subject.bgClass}`}
+                >
+                  <span 
+                    className="w-2 h-2 rounded-full mr-1.5 shrink-0" 
+                    style={{ backgroundColor: subject.color }} 
+                  />
+                  {subject.name}
+                </span>
+
+                {/* Type badge */}
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${typeInfo.badge}`}>
+                  {typeInfo.label}
+                </span>
+
+                {/* Priority badge if urgent */}
+                {assignment.priority === 'urgent' && !isCompleted && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900">
+                    <AlertCircle className="w-3 h-3 mr-1 shrink-0" />
+                    Urgent
+                  </span>
+                )}
+
+                {/* Fichiers badge */}
+                {hasFiles && (
+                  <span 
+                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900"
+                    title={`${assignment.files?.length} fichier(s) joint(s)`}
+                  >
+                    <Paperclip className="w-3 h-3 mr-1 shrink-0" />
+                    {assignment.files?.length} {assignment.files?.length === 1 ? 'fichier' : 'fichiers'}
+                  </span>
+                )}
+
+                {/* Reminder timing badge */}
+                {assignment.reminderTiming && assignment.reminderTiming !== 'none' && (
+                  <span 
+                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs border ${
+                      assignment.reminderTiming === 'daily_before_deadline'
+                        ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900 font-medium'
+                        : 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                    }`}
+                    title={`Rappel configuré : ${reminderLabel[assignment.reminderTiming] || assignment.reminderTiming}`}
+                  >
+                    <Bell className="w-3 h-3 mr-1 shrink-0 text-slate-500 dark:text-slate-400" />
+                    {reminderLabel[assignment.reminderTiming] || assignment.reminderTiming}
+                  </span>
+                )}
+              </div>
+
+              {/* Title */}
+              <h3 
+                className={`text-base font-semibold leading-snug break-words ${
+                  isCompleted ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'
+                }`}
               >
-                <span 
-                  className="w-2 h-2 rounded-full mr-1.5 shrink-0" 
-                  style={{ backgroundColor: subject.color }} 
-                />
-                {subject.name}
-              </span>
-
-              {/* Type badge */}
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${typeInfo.badge}`}>
-                {typeInfo.label}
-              </span>
-
-              {/* Priority badge if urgent */}
-              {assignment.priority === 'urgent' && !isCompleted && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900">
-                  <AlertCircle className="w-3 h-3 mr-1 shrink-0" />
-                  Urgent
-                </span>
-              )}
-
-              {/* Fichiers badge */}
-              {hasFiles && (
-                <span 
-                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900"
-                  title={`${assignment.files?.length} fichier(s) joint(s)`}
-                >
-                  <Paperclip className="w-3 h-3 mr-1 shrink-0" />
-                  {assignment.files?.length} {assignment.files?.length === 1 ? 'fichier' : 'fichiers'}
-                </span>
-              )}
-
-              {/* Reminder timing badge */}
-              {assignment.reminderTiming && assignment.reminderTiming !== 'none' && (
-                <span 
-                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs border ${
-                    assignment.reminderTiming === 'daily_before_deadline'
-                      ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900 font-medium'
-                      : 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
-                  }`}
-                  title={`Rappel configuré : ${reminderLabel[assignment.reminderTiming] || assignment.reminderTiming}`}
-                >
-                  <Bell className="w-3 h-3 mr-1 shrink-0 text-slate-500 dark:text-slate-400" />
-                  {reminderLabel[assignment.reminderTiming] || assignment.reminderTiming}
-                </span>
-              )}
-            </div>
-
-            {/* Title */}
-            <h3 
-              className={`text-base font-semibold leading-snug break-words ${
-                isCompleted ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'
-              }`}
-            >
-              {assignment.title}
-            </h3>
+                {assignment.title}
+              </h3>
+            </header>
 
             {/* Timing / Countdown / Due date */}
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-600 dark:text-slate-400">
-              <span className="inline-flex items-center font-medium">
+              <time 
+                dateTime={new Date(assignment.dueDate).toISOString()}
+                className="inline-flex items-center font-medium"
+              >
                 <Calendar className="w-3.5 h-3.5 mr-1.5 text-slate-400 dark:text-slate-500 shrink-0" />
                 Rendu : {formatDateFrench(assignment.dueDate)}
-              </span>
+              </time>
 
               {!isCompleted && (
                 <span 
@@ -243,7 +248,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment, onEd
 
             {/* Description & Fichiers joints dépliables */}
             {(assignment.description || hasFiles) && (
-              <div className="mt-2.5">
+              <section aria-label="Consignes et fichiers joints" className="mt-2.5">
                 {expanded ? (
                   <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl text-xs text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-800">
                     {assignment.description && (
@@ -320,12 +325,12 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment, onEd
                     )}
                   </div>
                 )}
-              </div>
+              </section>
             )}
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-1 shrink-0">
+          <nav aria-label="Actions du devoir" className="flex items-center gap-1 shrink-0">
             {(assignment.description || hasFiles) && (
               <button
                 id={`expand-desc-${assignment.id}`}
@@ -361,18 +366,21 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment, onEd
             >
               <Trash2 className="w-4 h-4" />
             </button>
-          </div>
+          </nav>
         </div>
       </div>
 
       {/* Lightbox / Zoom aperçu image ou miniature */}
       {previewImage && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs"
+        <dialog 
+          open 
+          className="wb-dialog"
           onClick={() => setPreviewImage(null)}
+          aria-label="Aperçu agrandi de l'image"
         >
+          <div className="wb-dialog-backdrop" />
           <div 
-            className="relative max-w-2xl max-h-[85vh] bg-white dark:bg-slate-900 rounded-2xl overflow-hidden p-2 shadow-2xl border border-slate-700"
+            className="relative max-w-2xl max-h-[85vh] bg-white dark:bg-slate-900 rounded-2xl overflow-hidden p-2 shadow-2xl border border-slate-700 z-10"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -389,8 +397,8 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({ assignment, onEd
               className="max-w-full max-h-[80vh] object-contain rounded-xl mx-auto" 
             />
           </div>
-        </div>
+        </dialog>
       )}
-    </div>
+    </article>
   );
 };

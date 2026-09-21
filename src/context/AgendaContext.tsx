@@ -22,8 +22,120 @@ import {
   DEFAULT_SUBJECTS, 
   AppNotification 
 } from '../types';
-import { notificationService } from '../services/notificationService';
 import { getDeadlineCountdown, isOverdue } from '../utils/dateUtils';
+
+// Gestionnaire de notifications & carillon sonore intégré
+class NotificationManager {
+  private audioCtx: AudioContext | null = null;
+  private soundEnabled: boolean = true;
+  private notifiedSet: Set<string> = new Set();
+
+  constructor() {
+    try {
+      const saved = sessionStorage.getItem('agenda_notified_keys');
+      if (saved) {
+        this.notifiedSet = new Set(JSON.parse(saved));
+      }
+      const soundPref = localStorage.getItem('agenda_sound_enabled');
+      if (soundPref !== null) {
+        this.soundEnabled = soundPref === 'true';
+      }
+    } catch {}
+  }
+
+  public isSupported(): boolean {
+    return typeof window !== 'undefined' && 'Notification' in window;
+  }
+
+  public getPermission(): NotificationPermission | 'unsupported' {
+    if (!this.isSupported()) return 'unsupported';
+    return Notification.permission;
+  }
+
+  public async requestPermission(): Promise<NotificationPermission | 'unsupported'> {
+    if (!this.isSupported()) return 'unsupported';
+    try {
+      return await Notification.requestPermission();
+    } catch {
+      return Notification.permission;
+    }
+  }
+
+  public isSoundEnabled(): boolean {
+    return this.soundEnabled;
+  }
+
+  public setSoundEnabled(enabled: boolean): void {
+    this.soundEnabled = enabled;
+    try {
+      localStorage.setItem('agenda_sound_enabled', enabled ? 'true' : 'false');
+    } catch {}
+  }
+
+  public playChime(isUrgent = false): void {
+    if (!this.soundEnabled) return;
+    try {
+      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtxClass) return;
+
+      if (!this.audioCtx || this.audioCtx.state === 'suspended') {
+        this.audioCtx = new AudioCtxClass();
+      }
+
+      const now = this.audioCtx.currentTime;
+      const gainNode = this.audioCtx.createGain();
+      gainNode.connect(this.audioCtx.destination);
+      gainNode.gain.setValueAtTime(0.12, now);
+
+      const osc = this.audioCtx.createOscillator();
+      osc.type = 'sine';
+      if (isUrgent) {
+        osc.frequency.setValueAtTime(659.25, now);
+        osc.frequency.setValueAtTime(880, now + 0.12);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } else {
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.start(now);
+        osc.stop(now + 0.55);
+      }
+      osc.connect(gainNode);
+    } catch {}
+  }
+
+  public sendNotification(title: string, body: string, key?: string, isUrgent = false): boolean {
+    if (key && this.notifiedSet.has(key)) {
+      return false;
+    }
+
+    this.playChime(isUrgent);
+
+    if (key) {
+      this.notifiedSet.add(key);
+      try {
+        sessionStorage.setItem('agenda_notified_keys', JSON.stringify(Array.from(this.notifiedSet)));
+      } catch {}
+    }
+
+    if (this.isSupported() && Notification.permission === 'granted') {
+      try {
+        new Notification(title, {
+          body,
+          icon: '/favicon.ico',
+          tag: key,
+        });
+        return true;
+      } catch {}
+    }
+
+    return false;
+  }
+}
+
+const notificationService = new NotificationManager();
 
 interface AgendaContextType {
   user: User | null;

@@ -89,10 +89,12 @@ const AgendaAppContent: React.FC = () => {
         <OverviewCards />
 
         {/* View Switcher Tabs Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-          <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 dark:bg-slate-800/80 rounded-xl">
+        <nav aria-label="Modes d'affichage de l'agenda" className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 dark:bg-slate-800/80 rounded-xl" role="tablist">
             <button
               id="tab-calendar"
+              role="tab"
+              aria-selected={activeTab === 'calendar'}
               type="button"
               onClick={() => setActiveTab('calendar')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
@@ -107,6 +109,8 @@ const AgendaAppContent: React.FC = () => {
 
             <button
               id="tab-list"
+              role="tab"
+              aria-selected={activeTab === 'list'}
               type="button"
               onClick={() => setActiveTab('list')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
@@ -124,6 +128,8 @@ const AgendaAppContent: React.FC = () => {
 
             <button
               id="tab-subjects"
+              role="tab"
+              aria-selected={activeTab === 'subjects'}
               type="button"
               onClick={() => setActiveTab('subjects')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
@@ -140,10 +146,10 @@ const AgendaAppContent: React.FC = () => {
           <div className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
             {assignments.filter(a => a.status === 'completed').length} devoirs bouclés sur {assignments.length}
           </div>
-        </div>
+        </nav>
 
         {/* View Contents */}
-        <div>
+        <section aria-label="Espace de travail actif">
           {activeTab === 'calendar' && (
             <CalendarView 
               onAddOnDate={(d) => handleOpenAddModal(d)}
@@ -164,12 +170,12 @@ const AgendaAppContent: React.FC = () => {
               onEditAssignment={handleOpenEditModal}
             />
           )}
-        </div>
+        </section>
 
       </main>
 
       {/* Floating Add Button for Mobile */}
-      <div className="fixed bottom-5 right-5 sm:hidden z-30">
+      <aside className="fixed bottom-5 right-5 sm:hidden z-30" aria-label="Action rapide mobile">
         <button
           id="fab-add-assignment"
           type="button"
@@ -179,7 +185,7 @@ const AgendaAppContent: React.FC = () => {
         >
           <Plus className="w-7 h-7 stroke-[2.5]" />
         </button>
-      </div>
+      </aside>
 
       {/* Modals */}
       <AssignmentModal

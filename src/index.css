@@ -1,3 +1,289 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   WorksBox Agenda - Design System HTML5 & CSS Déclaratif
+   ========================================================================== */
+
+:root {
+  --wb-primary: #2563eb;
+  --wb-primary-hover: #1d4ed8;
+  --wb-bg: #f8fafc;
+  --wb-surface: #ffffff;
+  --wb-border: #e2e8f0;
+  --wb-text: #0f172a;
+  --wb-text-muted: #64748b;
+  --wb-radius: 1rem;
+}
+
+.dark {
+  --wb-bg: #020617;
+  --wb-surface: #0f172a;
+  --wb-border: #1e293b;
+  --wb-text: #f8fafc;
+  --wb-text-muted: #94a3b8;
+}
+
+/* Base HTML5 tags styling */
+body {
+  background-color: var(--wb-bg);
+  color: var(--wb-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #334155;
+}
+
+/* ==========================================================================
+   Composants CSS - Structure Sémantique
+   ========================================================================== */
+
+/* Cartes & Conteneurs */
+.wb-card {
+  background-color: var(--wb-surface);
+  border: 1px solid var(--wb-border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.wb-card:hover {
+  border-color: #cbd5e1;
+}
+.dark .wb-card:hover {
+  border-color: #334155;
+}
+
+/* Cartes Métriques (Overview) */
+.wb-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .wb-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .wb-metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.wb-metric-card {
+  background-color: var(--wb-surface);
+  border: 1px solid var(--wb-border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+/* Balise HTML5 <progress> native stylisée */
+progress.wb-progress-bar {
+  width: 100%;
+  height: 0.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: none;
+  background-color: #e2e8f0;
+}
+.dark progress.wb-progress-bar {
+  background-color: #1e293b;
+}
+progress.wb-progress-bar::-webkit-progress-bar {
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+}
+.dark progress.wb-progress-bar::-webkit-progress-bar {
+  background-color: #1e293b;
+}
+progress.wb-progress-bar::-webkit-progress-value {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+progress.wb-progress-bar::-moz-progress-bar {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  border-radius: 9999px;
+}
+
+/* Boutons Déclaratifs CSS */
+.wb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.wb-btn-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.2);
+}
+.wb-btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.wb-btn-secondary {
+  background-color: var(--wb-surface);
+  border-color: var(--wb-border);
+  color: var(--wb-text);
+}
+.wb-btn-secondary:hover {
+  background-color: #f1f5f9;
+}
+.dark .wb-btn-secondary:hover {
+  background-color: #1e293b;
+}
+
+.wb-btn-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+.dark .wb-btn-danger {
+  background-color: rgba(153, 27, 27, 0.3);
+  color: #fca5a5;
+}
+.wb-btn-danger:hover {
+  background-color: #fecaca;
+}
+
+/* Badges et Balises */
+.wb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   Grille Emploi du Temps Scolaire Déclaratif
+   ========================================================================== */
+.wb-timetable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.wb-timetable-slot {
+  min-height: 76px;
+  padding: 0.375rem;
+  position: relative;
+  transition: background-color 0.15s ease;
+  border-right: 1px solid var(--wb-border);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.wb-timetable-slot:hover {
+  background-color: rgba(59, 130, 246, 0.04);
+}
+.dark .wb-timetable-slot:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.wb-timetable-hour-header {
+  padding: 0.6rem;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--wb-text-muted);
+  border-right: 1px solid var(--wb-border);
+  border-bottom: 1px solid var(--wb-border);
+  background-color: rgba(248, 250, 252, 0.7);
+}
+.dark .wb-timetable-hour-header {
+  background-color: rgba(15, 23, 42, 0.5);
+}
+
+/* Boîte de dialogue modale HTML5 */
+dialog.wb-dialog {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+  max-height: 100%;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  position: fixed;
+  inset: 0;
+}
+
+.wb-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  animation: wbFadeIn 0.2s ease-out;
+}
+
+.wb-dialog-content {
+  position: relative;
+  background-color: var(--wb-surface);
+  border: 1px solid var(--wb-border);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: wbSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animations Déclaratives */
+@keyframes wbFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes wbSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+

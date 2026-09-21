@@ -32,33 +32,36 @@ export const OverviewCards: React.FC = () => {
   const remainingMins = totalEstimatedMinutes % 60;
 
   return (
-    <div id="overview-metrics-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <section id="overview-metrics-grid" aria-label="Statistiques et métriques des devoirs" className="wb-metrics-grid">
       {/* 1. Prochain Rendu */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs flex flex-col justify-between transition-colors">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+      <article className="wb-metric-card">
+        <header className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Prochain rendu
-          </span>
+          </h3>
           <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 flex items-center justify-center">
             <Clock className="w-4 h-4" />
           </div>
-        </div>
+        </header>
 
         <div className="my-2.5">
           {nextAssignment && nextCountdown ? (
             <div>
               <div className="flex items-center gap-1.5 mb-1">
                 <span 
-                  className={`inline-block w-2 h-2 rounded-full`}
+                  className="inline-block w-2 h-2 rounded-full"
                   style={{ backgroundColor: nextSubject?.color || '#3B82F6' }}
                 />
                 <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[150px]">
                   {nextSubject?.name || 'Matière'}
                 </span>
               </div>
-              <div className={`text-lg font-bold truncate ${nextCountdown.isOverdue ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
+              <time 
+                dateTime={new Date(nextAssignment.dueDate).toISOString()}
+                className={`text-lg font-bold block truncate ${nextCountdown.isOverdue ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}
+              >
                 {nextCountdown.text}
-              </div>
+              </time>
               <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5" title={nextAssignment.title}>
                 {nextAssignment.title}
               </p>
@@ -75,24 +78,24 @@ export const OverviewCards: React.FC = () => {
           )}
         </div>
 
-        <div className="text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between">
+        <footer className="text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between">
           <span>{pendingList.length} devoir{pendingList.length > 1 ? 's' : ''} restant{pendingList.length > 1 ? 's' : ''}</span>
           {overdueCount > 0 && (
             <span className="text-red-600 dark:text-red-400 font-semibold">{overdueCount} en retard</span>
           )}
-        </div>
-      </div>
+        </footer>
+      </article>
 
       {/* 2. Devoirs pour aujourd'hui & urgences */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs flex flex-col justify-between transition-colors">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+      <article className="wb-metric-card">
+        <header className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             À rendre aujourd'hui
-          </span>
+          </h3>
           <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center">
             <CalendarCheck className="w-4 h-4" />
           </div>
-        </div>
+        </header>
 
         <div className="my-2.5">
           <div className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -105,26 +108,26 @@ export const OverviewCards: React.FC = () => {
           </p>
         </div>
 
-        <div className="text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between">
+        <footer className="text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between">
           <span>Urgent(s) : {urgentCount}</span>
           {urgentCount > 0 && (
             <span className="inline-flex items-center text-red-600 dark:text-red-400 font-medium">
               <Flame className="w-3 h-3 mr-0.5" /> Priorité haute
             </span>
           )}
-        </div>
-      </div>
+        </footer>
+      </article>
 
       {/* 3. Progression globale */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs flex flex-col justify-between transition-colors">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+      <article className="wb-metric-card">
+        <header className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Progression
-          </span>
+          </h3>
           <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
             <CheckCircle className="w-4 h-4" />
           </div>
-        </div>
+        </header>
 
         <div className="my-2.5">
           <div className="flex items-baseline justify-between mb-1.5">
@@ -133,30 +136,32 @@ export const OverviewCards: React.FC = () => {
               {completedCount}/{total} terminés
             </span>
           </div>
-          {/* Progress bar */}
-          <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-emerald-500 transition-all duration-500 rounded-full"
-              style={{ width: `${percent}%` }}
-            />
-          </div>
+          {/* HTML5 Native Progress bar */}
+          <progress 
+            className="wb-progress-bar" 
+            value={percent} 
+            max={100} 
+            aria-label="Taux d'achèvement des devoirs"
+          >
+            {percent}%
+          </progress>
         </div>
 
-        <div className="text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2">
+        <footer className="text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2">
           {percent === 100 && total > 0 ? 'Félicitations, tout est bouclé !' : `${total - completedCount} devoir(s) à finaliser`}
-        </div>
-      </div>
+        </footer>
+      </article>
 
       {/* 4. Temps de travail estimé */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs flex flex-col justify-between transition-colors">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+      <article className="wb-metric-card">
+        <header className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Temps estimé restant
-          </span>
+          </h3>
           <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
             <Clock className="w-4 h-4" />
           </div>
-        </div>
+        </header>
 
         <div className="my-2.5">
           <div className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -167,10 +172,10 @@ export const OverviewCards: React.FC = () => {
           </p>
         </div>
 
-        <div className="text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2">
+        <footer className="text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2">
           Moyenne : {pendingList.length > 0 ? Math.round(totalEstimatedMinutes / pendingList.length) : 0} min / devoir
-        </div>
-      </div>
-    </div>
+        </footer>
+      </article>
+    </section>
   );
 };

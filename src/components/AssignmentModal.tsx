@@ -20,18 +20,103 @@ import {
 } from 'lucide-react';
 import { Assignment, AssignmentType, PriorityLevel, ReminderTiming, AttachedFile } from '../types';
 import { useAgenda } from '../context/AgendaContext';
-import { toInputDateTimeLocal } from '../utils/dateUtils';
-import { 
-  MAX_FILE_SIZE_BYTES, 
-  MAX_FILES_COUNT, 
-  formatFileSize, 
-  readFileAsDataURL, 
-  createOptimizedThumbnail, 
-  saveFileLocally, 
-  THUMBNAIL_PRESETS, 
-  getPresetThumbnailDataUrl,
-  ThumbnailPreset
-} from '../services/fileStorage';
+import { toInputDateTimeLocal, formatFileSize } from '../utils/dateUtils';
+
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 Mo
+export const MAX_FILES_COUNT = 5;
+
+// Convertit un fichier en DataURL
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+// Crée une miniature compressée pour synchroniser dans Firestore (< 25 Ko)
+function createOptimizedThumbnail(imageSource: string | File): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const dataUrl = typeof imageSource === 'string' ? imageSource : await readFileAsDataURL(imageSource);
+      
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 220;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+interface ThumbnailPreset {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+  gradient: string;
+}
+
+const THUMBNAIL_PRESETS: ThumbnailPreset[] = [
+  { id: 'preset-maths', label: 'Maths / Équations', icon: '📐', color: '#2563EB', gradient: 'from-blue-500 to-indigo-600' },
+  { id: 'preset-francais', label: 'Français / Rédaction', icon: '📖', color: '#D97706', gradient: 'from-amber-500 to-orange-600' },
+  { id: 'preset-histoire', label: 'Histoire / Géo', icon: '🌍', color: '#059669', gradient: 'from-emerald-500 to-teal-600' },
+  { id: 'preset-science', label: 'Sciences / Labo', icon: '🧪', color: '#7C3AED', gradient: 'from-purple-500 to-violet-600' },
+  { id: 'preset-langues', label: 'Langues vivantes', icon: '🗣️', color: '#DB2777', gradient: 'from-pink-500 to-rose-600' },
+  { id: 'preset-code', label: 'Informatique / NSI', icon: '💻', color: '#0284C7', gradient: 'from-sky-500 to-cyan-600' },
+  { id: 'preset-dm', label: 'Devoir Maison (DM)', icon: '📝', color: '#4F46E5', gradient: 'from-indigo-500 to-blue-600' },
+  { id: 'preset-ds', label: 'Contrôle / Examen', icon: '⏱️', color: '#DC2626', gradient: 'from-rose-500 to-red-600' },
+  { id: 'preset-lecture', label: 'Lecture / Roman', icon: '📚', color: '#EA580C', gradient: 'from-orange-500 to-amber-600' }
+];
+
+function getPresetThumbnailDataUrl(preset: ThumbnailPreset): string {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+    <defs>
+      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${preset.color}" />
+        <stop offset="100%" stop-color="#1E293B" />
+      </linearGradient>
+    </defs>
+    <rect width="200" height="200" rx="28" fill="url(#grad)" />
+    <text x="100" y="105" font-size="70" text-anchor="middle" dominant-baseline="central">${preset.icon}</text>
+    <text x="100" y="165" font-size="16" font-family="sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">${preset.label.split('/')[0].trim()}</text>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 interface AssignmentModalProps {
   isOpen: boolean;
@@ -152,9 +237,6 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
         const fileId = `file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
         const dataUrl = await readFileAsDataURL(file);
         
-        // Sauvegarde locale IndexedDB
-        await saveFileLocally(fileId, dataUrl);
-
         const attached: AttachedFile = {
           id: fileId,
           name: file.name,
@@ -290,24 +372,31 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   };
 
   return (
-    <div 
-      id="assignment-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-xs overflow-y-auto"
-      onClick={onClose}
+    <dialog 
+      id="assignment-modal"
+      open
+      aria-modal="true"
+      aria-labelledby="assignment-modal-title"
+      className="wb-dialog"
     >
       <div 
+        id="assignment-modal-backdrop"
+        className="wb-dialog-backdrop"
+        onClick={onClose} 
+      />
+      <div 
         id="assignment-modal-container"
-        className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-5 sm:p-7 my-6 text-slate-900 dark:text-slate-100 transition-colors"
+        className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-5 sm:p-7 my-6 text-slate-900 dark:text-slate-100 transition-colors z-10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5">
+        <header className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">
+              <h2 id="assignment-modal-title" className="text-lg font-bold">
                 {assignmentToEdit ? 'Modifier le devoir' : 'Nouveau devoir scolaire'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -324,7 +413,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
+        </header>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
@@ -751,8 +840,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             />
           </div>
 
-          {/* Actions button */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          {/* Actions footer */}
+          <footer className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
@@ -775,10 +864,10 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 </>
               )}
             </button>
-          </div>
+          </footer>
 
         </form>
       </div>
-    </div>
+    </dialog>
   );
 };
